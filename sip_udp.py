@@ -20,7 +20,8 @@ class HoneyUDPHandler(socketserver.BaseRequestHandler):
 
 
     def handle(self):
-        data = self.request[0].strip()
+        #data = self.request[0].strip()
+        data = self.request[0].decode('utf-8')
         socket = self.request[1]
         # Further limiting the string to valid ACSII
         rematch = re.match("([A-Z]+) ([^ ]+) ?.*", data)
@@ -66,8 +67,9 @@ class HoneyUDPHandler(socketserver.BaseRequestHandler):
             rheaders = {}
         # Assemble response
         for k in rheaders:
-            resp += '%s: %s\n' % k % rheaders[k]
-            socket.sendto(resp, self.client_address)
+            #resp += '%s: %s\n' % k % rheaders[k]
+            resp += k + ':' + rheaders[k] + '\n'
+            socket.sendto(resp.encode('utf-8'), self.client_address)
 
 def report(hostip,method):
     if cfg['report']['enabled'] == True:
