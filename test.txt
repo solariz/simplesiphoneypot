@@ -1,0 +1,11 @@
+INVITE sip:john.mueller@sampledomain.de SIP/2.0
+Via: SIP/2.0/UDP 192.168.100.123:5060
+From: sip:t.test@anothertest.com
+To: sip:john.mueller@smapledomain.de
+Contact: sip:t.test@192.168.100.10
+Call-ID: 123456789@192.168.100.10
+CSeq: 38547329 INVITE
+Content-Length: 150
+Content-Type: application/sdp
+User-Agent: SIP SoftPhone
+

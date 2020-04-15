@@ -1,0 +1,3 @@
+report:
+        enabled: true
+        url: 'https://myreport-url-to-receive-post-data/honeysip.php'
