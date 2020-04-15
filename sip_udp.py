@@ -1,10 +1,14 @@
 import StringIO, re
 import SocketServer, sys, logging
 import os, subprocess, requests
-#from termcolor import colored
+import yaml
+
+
+with open("config.yml", "r") as ymlfile:
+    cfg = yaml.load(ymlfile)
+
 
 USER_AGENT = "Asterix PBX"
-
 
 class HoneyUDPHandler(SocketServer.BaseRequestHandler):
     """
@@ -29,7 +33,6 @@ class HoneyUDPHandler(SocketServer.BaseRequestHandler):
         if method == 'OPTIONS':
             resp = 'SIP/2.0 200 OK\n'
             rheaders = {}
-            #rheaders['To'] += ';tag=' + uuid.uuid4().hex
             rheaders['Allow'] = 'INVITE, ACK, BYE, CANCEL, OPTIONS, MESSAGE, SUBSCRIBE, NOTIFY, INFO'
             rheaders['User-Agent'] = USER_AGENT
             logging.info('OPTIONS from {}'.format(self.client_address[0]))
@@ -44,7 +47,6 @@ class HoneyUDPHandler(SocketServer.BaseRequestHandler):
             print "REGISTER from {}".format(self.client_address[0])
             report(self.client_address[0],method)
         elif method == 'INVITE':
-            #resp = 'SIP/2.0 501 Not Implemented\n'
             resp = 'SIP/2.0 433 Anonymity Disallowed\n'
             rheaders = {}
             rheaders['User-Agent'] = USER_AGENT
@@ -68,11 +70,9 @@ class HoneyUDPHandler(SocketServer.BaseRequestHandler):
             socket.sendto(resp, self.client_address)
 
 def report(hostip,method):
-    # reporting online
-    url = 'https://dev.mgz.de/honeypot/honeysip.php'
-    myobj = {'host': hostip, 'method': method}
-    x = requests.post(url, data = myobj)
-    print(x.text)
+    if cfg['report']['enabled'] == True:
+        myobj = {'host': hostip, 'method': method}
+        x = requests.post(cfg['report']['url'], data = myobj)
 
 # Please do not run as root
 if os.geteuid() is 0:
@@ -84,6 +84,8 @@ if __name__ == "__main__":
     HOST, PORT = "0.0.0.0", 5060
     logging.debug('Starting HONEYSIP')
     print "Listening UDP/5060..."
+    if cfg['report']['enabled'] == True:
+        print("Reporting to: " + cfg['report']['url'])
     server = SocketServer.UDPServer((HOST, PORT), HoneyUDPHandler)
     server.serve_forever()
 
