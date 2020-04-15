@@ -1,5 +1,5 @@
-import StringIO, re
-import SocketServer, sys, logging
+import re
+import socketserver, sys, logging
 import os, subprocess, requests
 import yaml
 
@@ -10,7 +10,7 @@ with open("config.yml", "r") as ymlfile:
 
 USER_AGENT = "Asterix PBX"
 
-class HoneyUDPHandler(SocketServer.BaseRequestHandler):
+class HoneyUDPHandler(socketserver.BaseRequestHandler):
     """
     self.request consists of a pair of data and client socket, and since
     there is no connection the client address must be given explicitly
@@ -25,7 +25,7 @@ class HoneyUDPHandler(SocketServer.BaseRequestHandler):
         # Further limiting the string to valid ACSII
         rematch = re.match("([A-Z]+) ([^ ]+) ?.*", data)
         if not rematch:
-            print "Unexpected UDP input from {}".format(self.client_address[0])
+            print("Unexpected UDP input from %s" % self.client_address[0])
             return
         method = rematch.group(1)
         url = rematch.group(2)
@@ -35,38 +35,38 @@ class HoneyUDPHandler(SocketServer.BaseRequestHandler):
             rheaders = {}
             rheaders['Allow'] = 'INVITE, ACK, BYE, CANCEL, OPTIONS, MESSAGE, SUBSCRIBE, NOTIFY, INFO'
             rheaders['User-Agent'] = USER_AGENT
-            logging.info('OPTIONS from {}'.format(self.client_address[0]))
-            logging.debug('REQUEST: "{}"'.format(data))
-            print "OPTIONS from {}".format(self.client_address[0])
+            logging.info('OPTIONS from %s' % self.client_address[0])
+            logging.debug('REQUEST: "%s"' % data)
+            print("OPTIONS from %s" % self.client_address[0])
             report(self.client_address[0],method)
         elif method == 'REGISTER':
             resp = 'SIP/2.0 200 OK\n'
             rheaders['User-Agent'] = USER_AGENT
-            logging.info('REGISTER from {}'.format(self.client_address[0]))
-            logging.debug('REQUEST: "{}"'.format(data))
-            print "REGISTER from {}".format(self.client_address[0])
+            logging.info('REGISTER from %s' % self.client_address[0])
+            logging.debug('REQUEST: "%s"' % data)
+            print("REGISTER from %s" % self.client_address[0])
             report(self.client_address[0],method)
         elif method == 'INVITE':
             resp = 'SIP/2.0 433 Anonymity Disallowed\n'
             rheaders = {}
             rheaders['User-Agent'] = USER_AGENT
-            logging.info('INVITE from {}'.format(self.client_address[0]))
-            logging.debug('REQUEST: "{}"'.format(data))
-            print "INVITE from {}".format(self.client_address[0])
+            logging.info('INVITE from %s' % self.client_address[0])
+            logging.debug('REQUEST: "%s"' % data)
+            print("INVITE from %s" % self.client_address[0])
             report(self.client_address[0],method)
         elif (method == 'ACK' or method == 'BYE'):
             resp = 'SIP/2.0 200 OK\n'
             rheaders = {}
             rheaders['User-Agent'] = USER_AGENT
-            logging.info('ACK from {}'.format(self.client_address[0]))
-            logging.debug('REQUEST: "{}"'.format(data))
-            print "ACK from {}".format(self.client_address[0])        
+            logging.info('ACK from %s' % self.client_address[0])
+            logging.debug('REQUEST: "%s' % data)
+            print("ACK from %s" % self.client_address[0])
         else:
             resp = 'SIP/2.0 501 Not Implemented\n'
             rheaders = {}
         # Assemble response
         for k in rheaders:
-            resp += '{}: {}\n'.format(k, rheaders[k])
+            resp += '%s: %s\n' % k % rheaders[k]
             socket.sendto(resp, self.client_address)
 
 def report(hostip,method):
@@ -76,16 +76,16 @@ def report(hostip,method):
 
 # Please do not run as root
 if os.geteuid() is 0:
-    print "This honepot should not run as root."
+    print("This honepot should not run as root.")
     sys.exit(1)
 
 if __name__ == "__main__":
     logging.basicConfig(filename='honeysip.log',level=logging.DEBUG,format='%(asctime)s %(message)s')
     HOST, PORT = "0.0.0.0", 5060
     logging.debug('Starting HONEYSIP')
-    print "Listening UDP/5060..."
+    print("Listening UDP/5060...")
     if cfg['report']['enabled'] == True:
         print("Reporting to: " + cfg['report']['url'])
-    server = SocketServer.UDPServer((HOST, PORT), HoneyUDPHandler)
+    server = socketserver.UDPServer((HOST, PORT), HoneyUDPHandler)
     server.serve_forever()
 
