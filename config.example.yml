@@ -1,3 +1,6 @@
 report:
         enabled: true
         url: 'https://myreport-url-to-receive-post-data/honeysip.php'
+log:
+        logrequest: true
+        logfile: 'honeysip.log'

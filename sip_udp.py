@@ -5,7 +5,7 @@ import yaml
 
 
 with open("config.yml", "r") as ymlfile:
-    cfg = yaml.load(ymlfile)
+    cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
 
 USER_AGENT = "Asterix PBX"
@@ -37,14 +37,16 @@ class HoneyUDPHandler(socketserver.BaseRequestHandler):
             rheaders['Allow'] = 'INVITE, ACK, BYE, CANCEL, OPTIONS, MESSAGE, SUBSCRIBE, NOTIFY, INFO'
             rheaders['User-Agent'] = USER_AGENT
             logging.info('OPTIONS from %s' % self.client_address[0])
-            logging.debug('REQUEST: "%s"' % data)
+            if cfg['log']['logrequest'] == True:
+                logging.debug('REQUEST: "%s' % data)
             print("OPTIONS from %s" % self.client_address[0])
             report(self.client_address[0],method)
         elif method == 'REGISTER':
             resp = 'SIP/2.0 200 OK\n'
             rheaders['User-Agent'] = USER_AGENT
             logging.info('REGISTER from %s' % self.client_address[0])
-            logging.debug('REQUEST: "%s"' % data)
+            if cfg['log']['logrequest'] == True:
+                logging.debug('REQUEST: "%s' % data)
             print("REGISTER from %s" % self.client_address[0])
             report(self.client_address[0],method)
         elif method == 'INVITE':
@@ -52,7 +54,8 @@ class HoneyUDPHandler(socketserver.BaseRequestHandler):
             rheaders = {}
             rheaders['User-Agent'] = USER_AGENT
             logging.info('INVITE from %s' % self.client_address[0])
-            logging.debug('REQUEST: "%s"' % data)
+            if cfg['log']['logrequest'] == True:
+                logging.debug('REQUEST: "%s' % data)
             print("INVITE from %s" % self.client_address[0])
             report(self.client_address[0],method)
         elif (method == 'ACK' or method == 'BYE'):
@@ -60,7 +63,8 @@ class HoneyUDPHandler(socketserver.BaseRequestHandler):
             rheaders = {}
             rheaders['User-Agent'] = USER_AGENT
             logging.info('ACK from %s' % self.client_address[0])
-            logging.debug('REQUEST: "%s' % data)
+            if cfg['log']['logrequest'] == True:
+                logging.debug('REQUEST: "%s' % data)
             print("ACK from %s" % self.client_address[0])
         else:
             resp = 'SIP/2.0 501 Not Implemented\n'
@@ -82,10 +86,11 @@ if os.geteuid() is 0:
     sys.exit(1)
 
 if __name__ == "__main__":
-    logging.basicConfig(filename='honeysip.log',level=logging.DEBUG,format='%(asctime)s %(message)s')
+    logging.basicConfig(filename=cfg['log']['logfile'],level=logging.DEBUG,format='%(asctime)s %(message)s')
     HOST, PORT = "0.0.0.0", 5060
     logging.debug('Starting HONEYSIP')
     print("Listening UDP/5060...")
+    print("Logging to: " + cfg['log']['logfile'])
     if cfg['report']['enabled'] == True:
         print("Reporting to: " + cfg['report']['url'])
     server = socketserver.UDPServer((HOST, PORT), HoneyUDPHandler)
