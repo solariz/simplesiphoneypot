@@ -1,0 +1,16 @@
+# Fail2ban and the honeysip
+
+Those are example configurations for Fail2ban.
+I strongly advise to use fail2ban on the honeypot system to prevent spamming your honeypot.
+The Honeypot itself does not have any rate limiter or DOS Protection.
+
+You can setup a iptables allow rule for 5060/udp with limit of new connections per source IP.
+
+Or use fail2ban to directly ban source IPs triggering the honeypot.
+
+# configure fail2ban
+
+-   copy the filter difinition *honeysip.conf* to your fail2ban filter dir. 
+    e.g. /etc/fail2ban/filter.d/
+-   edit your jail config file and add config from jail.conf e.g. to
+    /etc/fail2ban/jail.d/myfilter.conf
