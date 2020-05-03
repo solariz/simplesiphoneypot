@@ -1,5 +1,10 @@
-# honeysip
-Simple SIP Honeypot
+# Simple Sip Honeypot and Reporter
+Simple SIP Honeypot based on the abandoned honeysip project. This simple pot does not aim to be a SIP Protocol implementation to fool the "Alien Host" and keep him busy, it is more or less just logging. To avoid logging of all incoming udp requests on 5060 it do need valid SIP header requests, so a very basic check is done.
+
+I created that script actually for my own purpose to run it on some static IPv4 I have which defenitly not runing Anything on SIP/PBX or communication and are long time in my posission. So nobody should contact this Systems with a SIP Request. I use this Script to report back to a Database and if a host found "guilty" to often I use those Data to put them in a Blacklist. This Blacklist I than use on my Real PBX Firewall to already prefilter those unwanted Hosts.
+
+You can find the Blacklists and read more about it in a Blogpost I wrote:
+[Blog post: SIP Honeypot Blacklist](https://tcpip.wtf/en/honeysip-sip-voip-ipv4-blacklist-honeypot.htm)
 
 
 
@@ -39,6 +44,6 @@ Logging to: honeysip.log
 Reporting to: https://<whatever>
 ```
 
-You can detach your screen now <CTRL>-<A> -> <D>
+You can detach your screen now (CTRL)-(A) -> (D)
 
 That should be it.
